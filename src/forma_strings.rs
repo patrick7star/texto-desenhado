@@ -7,7 +7,8 @@
 
 // módulo externo.
 mod constroi_simbolos;
-pub use constroi_simbolos::*;
+use constroi_simbolos::*;
+pub use constroi_simbolos::imprime;
 
 
 fn forma_palavra(palavra:&str) -> Vec<Vec<char>> {
@@ -189,7 +190,7 @@ fn fatia_em_classes(string:&str) -> Vec<String> {
 
       /* se for uma das pontuações já criadas, então
        * fazer o mesmo. */
-      let implementada = "\"{}[]()@\\$:!+-=*/?><%#~.,;:^";
+      let implementada = "\"{}[]()\\$!?@><%~+-/*=#,;:.^";
       if ch.is_ascii_punctuation() && 
          implementada.contains(&ch.to_string()) 
             { aux_num.push(ch); }
@@ -336,9 +337,7 @@ pub fn desenha_string(string:&str) -> Vec<Vec<char>>{
 
 #[cfg(test)]
 mod tests {
-   
    #[test]
-   #[ignore]
    fn testa_fec() {
       let vetor = super::fatia_em_classes("numero3casa08quadra46");
       println!("vetor={:#?}", vetor);
@@ -346,53 +345,48 @@ mod tests {
    }
 
    #[test]
-   #[ignore]
    fn igualiza_qtd_linhas() {
-      let mut letraH = super::forma_palavra("H");
+      let mut letra_h = super::forma_palavra("H");
       let num8 = super::forma_numero("8");
-      let diferenca = (num8.len()-letraH.len()) as u8;
-      super::preenche_linhas_em_branco(&mut letraH,
+      let diferenca = (num8.len()-letra_h.len()) as u8;
+      super::preenche_linhas_em_branco(&mut letra_h,
                                        super::Lado::Inferior,
                                        diferenca);
-
-      assert_eq!(letraH.len(), num8.len());
+      assert_eq!(letra_h.len(), num8.len());
    }
 
    use crate::forma_strings::constroi_simbolos::imprime;
 
    #[test]
-   #[ignore]
    fn diferencas_preenchimento() {
-      let mut letraR = super::forma_palavra("R");
-      let mut letraH = super::forma_palavra("H");
+      let mut letra_r = super::forma_palavra("R");
+      let mut letra_h = super::forma_palavra("h");
 
-      super::preenche_linhas_em_branco(&mut letraR,
+      super::preenche_linhas_em_branco(&mut letra_r,
                                 super::Lado::Superior,6);
-      super::preenche_linhas_em_branco(&mut letraH,
+      super::preenche_linhas_em_branco(&mut letra_h,
                                 super::Lado::Inferior, 6);
       println!("mostrando resultados:");
-      imprime(&letraR);
+      imprime(&letra_r);
       println!("\n\n");
-      imprime(&letraH);
+      imprime(&letra_h);
    } 
 
    #[test]
-   #[ignore]
    fn diferenca_pos_aninhamento() {
-      let mut letraH = super::forma_palavra("A");
+      let mut letra_h = super::forma_palavra("A");
       let mut num8 = super::forma_numero("8");
 
-      super::aninha_matrizes(&mut letraH, &mut num8);
+      super::aninha_matrizes(&mut letra_h, &mut num8);
 
       println!("como ficou:");
-      super::imprime(&letraH.clone());
+      super::imprime(&letra_h.clone());
       super::imprime(&num8.clone());
 
-      assert_eq!(0, letraH.len()-num8.len());
+      assert_eq!(0, letra_h.len()-num8.len());
    }
 
    #[test]
-   #[ignore]
    fn concatenacao_aninhamento_resultado() {
       let mut palavra = super::forma_palavra("resultado");
       let mut num = super::forma_numero("42");
@@ -406,8 +400,7 @@ mod tests {
 
 
    #[test]
-   #[ignore]
-   fn testa_DS() {
+   fn testa_ds() {
       let string = super::desenha_string("jabuti1234");
       super::imprime(&string);
       assert!(true);
