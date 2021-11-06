@@ -189,7 +189,7 @@ fn fatia_em_classes(string:&str) -> Vec<String> {
 
       /* se for uma das pontuações já criadas, então
        * fazer o mesmo. */
-      let implementada = "\"{[(@*\\$:!])=?>+<%~/-#,";
+      let implementada = "\"{}[]()@\\$:!+-=*/?><%#~.,;:^";
       if ch.is_ascii_punctuation() && 
          implementada.contains(&ch.to_string()) 
             { aux_num.push(ch); }
