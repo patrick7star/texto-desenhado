@@ -334,6 +334,37 @@ pub fn desenha_string(string:&str) -> Vec<Vec<char>>{
    return matriz;
 }
 
+pub fn desenha_frase(string:&str) -> 
+Result<Vec<Vec<char>>, &'static str> {
+   let palavras:Vec<&str> = {
+      string
+      .split_ascii_whitespace()
+      .collect()
+   };
+   let qtd = palavras.len();
+   if qtd == 0
+      { return Err("string vazias são inválidas."); }
+   else if qtd == 1
+      { return Ok(desenha_string(string)); }
+   // matriz representando espaço vázio.
+   let espaco:Vec<Vec<char>> = {
+      vec![
+         vec![' ',' ',],
+         vec![' ',' ',],
+         vec![' ',' ',],
+         vec![' ',' ',],
+         vec![' ',' ',],
+      ]
+   };
+   let mut frase:Vec<Vec<char>> = desenha_string(palavras[0]);
+   for p in palavras {
+      concatena_matriz(&mut frase, espaco.clone());
+      let palavra = desenha_string(p);
+      concatena_matriz(&mut frase, palavra);
+   }
+   return Ok(frase);
+}
+
 
 #[cfg(test)]
 mod tests {
