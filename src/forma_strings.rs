@@ -57,8 +57,7 @@ fn forma_palavra(palavra:&str) -> Vec<Vec<char>> {
     return matriz;
 }
 
-
-fn concatena_matriz(m1:&mut Vec<Vec<char>>, m2:Vec<Vec<char>>) {
+pub fn concatena_matriz(m1:&mut Vec<Vec<char>>, m2:Vec<Vec<char>>) {
     /* terceira função de concatena duas matrizes, no caso
      * concatena uma segunda(m2) na primeira(m1), esta última
      * sendo uma referência.*/
@@ -72,7 +71,6 @@ fn concatena_matriz(m1:&mut Vec<Vec<char>>, m2:Vec<Vec<char>>) {
         m1[linha].extend_from_slice(fatia);
     }
 }
-
 
 fn forma_numero(numero:&str) -> Vec<Vec<char>> {
    /* dado um número em forma de string, tendo ele
@@ -137,14 +135,13 @@ fn forma_numero(numero:&str) -> Vec<Vec<char>> {
     }
 }
 
-
 /* parte da tela/quadro/qualquer retângulo...
  * se quer almolfar com espaços em branco.
  */
 pub enum Lado { Superior, Inferior }
 
-fn preenche_linhas_em_branco(matriz:&mut Vec<Vec<char>>, 
-                                 parte:Lado, qtd:u8) {
+pub fn preenche_linhas_em_branco(matriz:&mut Vec<Vec<char>>, 
+parte:Lado, qtd:u8) {
    // dimensão da matriz.
    let colunas = matriz[0].len();
    let linha = vec![' '; colunas];
@@ -213,7 +210,7 @@ fn fatia_em_classes(string:&str) -> Vec<String> {
    return fatias;
 }
 
-fn aninha_matrizes(matriz:&mut Vec<Vec<char>>,
+pub fn aninha_matrizes(matriz:&mut Vec<Vec<char>>,
                        outra_matriz:&mut Vec<Vec<char>>) {
    // quantia de linhas de cada matriz.
    let qtd_m = matriz.len();
@@ -333,38 +330,6 @@ pub fn desenha_string(string:&str) -> Vec<Vec<char>>{
    // retorna matriz combinada.
    return matriz;
 }
-
-pub fn desenha_frase(string:&str) -> 
-Result<Vec<Vec<char>>, &'static str> {
-   let palavras:Vec<&str> = {
-      string
-      .split_ascii_whitespace()
-      .collect()
-   };
-   let qtd = palavras.len();
-   if qtd == 0
-      { return Err("string vazias são inválidas."); }
-   else if qtd == 1
-      { return Ok(desenha_string(string)); }
-   // matriz representando espaço vázio.
-   let espaco:Vec<Vec<char>> = {
-      vec![
-         vec![' ',' ',],
-         vec![' ',' ',],
-         vec![' ',' ',],
-         vec![' ',' ',],
-         vec![' ',' ',],
-      ]
-   };
-   let mut frase:Vec<Vec<char>> = desenha_string(palavras[0]);
-   for p in palavras {
-      concatena_matriz(&mut frase, espaco.clone());
-      let palavra = desenha_string(p);
-      concatena_matriz(&mut frase, palavra);
-   }
-   return Ok(frase);
-}
-
 
 #[cfg(test)]
 mod tests {

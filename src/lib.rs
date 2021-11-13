@@ -20,22 +20,24 @@ pub fn conserta_acentuacao(s:&str) -> String {
    texto = texto.replace("ã","a");
    texto = texto.replace("ú","u");
    texto = texto.replace("í","i");
+   texto = texto.replace("ç","c");
    texto = texto.replace("é","e");
    texto = texto.replace("á","a");
    texto = texto.replace("ô","o");
+   texto = texto.replace("à", "a");
    return texto;
 }
+
 pub fn aninha_str_em_texto(string:&str) -> LinkedList<Vec<Vec<char>>> {
-   // "retirando" a acentuação de algumas vogais.
-   let texto_fixed = conserta_acentuacao(string);
+   let novo_texto = conserta_acentuacao(string);
    // obtendo todas as palavras.
-   let mut palavras = texto_fixed.split_ascii_whitespace().peekable();
+   let mut palavras = novo_texto.split_ascii_whitespace().peekable();
    // largura da tela.
    let lt = match terminal_size() {
       Some((Width(l), Height(_))) => l,
       None => 0,
    };
-   println!("width_terminal={}", lt);
+   //println!("width_terminal={}", lt);
    let mut linhas:Vec<String> = Vec::new();
    let mut texto:LinkedList<Vec<Vec<char>>> = LinkedList::new();
    let mut lg:u16 = 0;
@@ -45,16 +47,16 @@ pub fn aninha_str_em_texto(string:&str) -> LinkedList<Vec<Vec<char>>> {
       /* se exceder a tela, então adicionar 
        * linha e, zerar tanto a 'string concatenadora'
        * como a medida da 'string-desenhada' */
-      if lg > lt-3 {
+      if lg > lt-4 {
          // adicionando linha formada...
          linhas.push(
-             //forma_strings::desenha_string(atual_linha.as_str())
-            //forma_strings::desenha_frase(atual_linha.as_str()).unwrap()
             atual_linha.clone()
          );
          // zerando coisas...
          atual_linha.clear();
          lg = 0;
+         // uma simples quebra-de-linha.
+         //println!(" ");
       }
       else {
          // não consumir, apenas "dá uma olhada", e 
@@ -65,44 +67,81 @@ pub fn aninha_str_em_texto(string:&str) -> LinkedList<Vec<Vec<char>>> {
             { break 'laco; }
          // mensurando a medida da string-desenhada.
          lg += {
-            let aux = forma_strings::desenha_string(
-               proxima
-               .unwrap()
-            );
-            aux[1].len() as u16
-            /*
-            let aux = forma_strings::desenha_frase(
+            let aux = desenha_frase(
                proxima
                .unwrap()
             ).unwrap(); 
-            2+(aux[1].len() as u16);
-            */
+            (aux[1].len() as u16) + 3
          };
-         if lg > lt-3
+         //println!("draw-width={}", lg);
+         if lg > lt-4
             { continue; }
          else { 
             // agora sim, comsumir próximo item.
             let proxima = palavras.next();
-            atual_linha += " ";
             atual_linha += proxima.unwrap_or(""); 
+            atual_linha += " ";
+            //println!("{}", atual_linha);
          }
       }
    }
    // adicionando todos na lista ligada.
    for l in linhas {
       texto.push_back(
-          forma_strings::desenha_string(l.as_str())
+          desenha_frase(l.as_str())
+          .unwrap()
       );
    }
    /* consertando... coloca última palavra, que
     * o algoritmo não consegue capturar. */
    texto.push_back(
-      forma_strings::desenha_string(atual_linha.as_str())
+      match desenha_frase(atual_linha.as_str()) {
+         Ok(desenho) => desenho,
+         Err(err_msg) => { panic!("{}",err_msg); }
+      }
    );
    // retornando texto completo.
    return texto;
 }
 
+pub fn desenha_frase(string:&str) -> 
+Result<Vec<Vec<char>>, &'static str> {
+   /* divindindo a frase por espaços brancos
+    * e quebra-de-linha. */
+   //let nova_string = conserta_acentuacao(string);
+   let mut palavras:Vec<&str> = {
+      string
+      .split_ascii_whitespace()
+      .collect()
+   };
+   // contando quantia de repartições realizadas.
+   let qtd = palavras.len();
+   if qtd == 0
+      { return Err("string vazias são inválidas."); }
+   else if qtd == 1
+      { return Ok(forma_strings::desenha_string(string)); }
+   // matriz representando espaço vázio.
+   let mut espaco:Vec<Vec<char>> = {
+      vec![
+         vec![' ',' ',],
+         vec![' ',' ',],
+         vec![' ',' ',],
+         vec![' ',' ',],
+         vec![' ',' ',],
+      ]
+   };
+   let mut frase:Vec<Vec<char>> = forma_strings::desenha_string(palavras[0]);
+   palavras.remove(0);
+   for p in palavras {
+      forma_strings::aninha_matrizes(&mut frase, &mut espaco);
+      forma_strings::concatena_matriz(&mut frase, espaco.clone());
+      // faz o desenho da palavra.
+      let mut palavra = forma_strings::desenha_string(p);
+      forma_strings::aninha_matrizes(&mut frase, &mut palavra);
+      forma_strings::concatena_matriz(&mut frase, palavra);
+   }
+   return Ok(frase);
+}
 
 #[cfg(test)]
 mod test {
@@ -124,19 +163,25 @@ mod test {
          { super::forma_strings::imprime(&obj); }
       assert!(false);
    }
-
    
    #[test]
    fn testa_nova_funcao_de_desenho() {
       let frase:&str = "isso e um teste simples";
       let frase_desenho:Vec<Vec<char>> = {
-         match super::forma_strings::desenha_frase(frase) {
+         match super::desenha_frase(frase) {
             Ok(fd) => fd,
             Err(erro_msg) => 
                { assert!(false); panic!("{}", erro_msg); }
          }
       };
+      let frase:&str = "você percebeu isto!";
+      let frase_desenho_ii:Vec<Vec<char>> = {
+         super::desenha_frase(frase)
+         .expect("erro com a frase dada") 
+      };
+      // visualizando...
       super::forma_strings::imprime(&frase_desenho);
+      super::forma_strings::imprime(&frase_desenho_ii);
       assert!(true);
    }
 }
