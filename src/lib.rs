@@ -143,6 +143,19 @@ Result<Vec<Vec<char>>, &'static str> {
    return Ok(frase);
 }
 
+/* calcula a quantia de espaço da borda e o
+ * texto criado. */
+fn calculo_espaco(desenho:&Vec<Vec<char>>) -> u8 {
+    // comprimento do desenho em sí.
+    let x1:u8 = desenho[1].len() as u8;
+    // largura da tela.
+    let x2:u8 = match terminal_size() {
+      Some((Width(l), Height(_))) => l as u8,
+      None => x1,
+    };
+    return x2-x1;
+}
+
 #[cfg(test)]
 mod test {
    #[test]
@@ -183,5 +196,28 @@ mod test {
       super::forma_strings::imprime(&frase_desenho);
       super::forma_strings::imprime(&frase_desenho_ii);
       assert!(true);
+   }
+ 
+   #[test]
+   fn computando_espacos_em_branco() {
+        let aux_draw = super::desenha_frase("farmácia drogaria").unwrap();
+        super::forma_strings::imprime(&aux_draw);
+        println!(
+            "espaço em branco: {}\n", 
+            super::calculo_espaco(&aux_draw)
+        );
+        let aux_draw = super::desenha_frase("independente").unwrap();
+        super::forma_strings::imprime(&aux_draw);
+        println!(
+            "espaço em branco: {}\n", 
+            super::calculo_espaco(&aux_draw)
+        );
+        let aux_draw = super::desenha_frase("meu relógio aqui").unwrap();
+        super::forma_strings::imprime(&aux_draw);
+        println!(
+            "espaço em branco: {}\n", 
+            super::calculo_espaco(&aux_draw)
+        );
+        assert!(true);
    }
 }
