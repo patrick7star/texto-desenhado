@@ -2,14 +2,16 @@
 
 // re-exportando funções e módulos.
 pub mod forma_strings;
+pub mod construtor;
+mod modelos;
+pub use modelos::{Texto, Aninhamento};
 
 // biblioteca externa necessária.
 extern crate terminal_size;
 use terminal_size::{Width, Height, terminal_size};
 
-// biblioteca padrão do Rust.
+// bilioteca padrão do Rust.
 use std::collections::LinkedList;
-use std::fmt::{Formatter, Display, Result as String_fmt};
 
 
 /**! Pega uma "string" reparte ela e formata
@@ -144,126 +146,14 @@ Result<Vec<Vec<char>>, &'static str> {
    return Ok(frase);
 }
 
-#[derive(Clone, Copy)]
-pub enum Aninhamento {
-   Centro,
-   Direita,
-   Esquerda,
-}
-pub struct Texto {
-   linhas:LinkedList<Vec<Vec<char>>>,
-   posicao:Aninhamento,
-}
-impl Texto {
-   /* computa o espaço em branco entre o texto 
-    * impresso e o limite da tela. */
-   fn calculo_espaco_vago(matriz:&Vec<Vec<char>>) -> u16 {
-      let lm:u16 = matriz[1].len() as u16;
-      let lt:u16 = match terminal_size() {
-         Some((Width(l),Height(_))) => l as u16,
-         None => lm,
-      };
-      return lt-lm;
-   }
-   /* aninha o texto na matriz dada, partindo da 
-    * direita da tela, ou no centro dela, o parâmetro
-    * pedindo o tipo de 'aninhamento'. Não há está
-    * opção a esquerda, pois a função que gera o 
-    * texto já é, por padrão, aninhado a ela. */
-   fn aninha_linha(mut matriz:Vec<Vec<char>>, 
-   aninhar:Aninhamento) -> Vec<Vec<char>> {
-      // dimensão(vertical) da matriz.
-      //let altura = matriz.len();
-      // espaços em brancos necessários.
-      const RECUO:char = ' ';
-      let qtd_espacos:usize = Texto::calculo_espaco_vago(&matriz) as usize;
-      /* tratando todos tipos de aninhamento.
-       * O tipo de algoritmo que fará isto é:
-       * vamos computar, com uma função auxiliar,
-       * a distãncia do texto á tela, posteriormente
-       * vamos, no caso da "direita" preencher
-       * o lado esquerdo com 'filetes branco' 
-       * até que o texto "encoste" no limite da 
-       * tela; já o centro o mesmo, porém divido
-       * em partes metade desse acrescimo de "filetes"
-       * ao lado esquerdo, o outro ao direito. */
-      match aninhar {
-         // primeiro à direita.
-         Aninhamento::Direita => {
-            for _ in 1..(qtd_espacos+1) {
-               for linha in matriz.iter_mut() {
-                  linha.insert(0, RECUO);
-               }
-            }
-         },
-         // ao centro.
-         Aninhamento::Centro => {
-            for _ in 1..(qtd_espacos/2+1) {
-               for linha in matriz.iter_mut() {
-                  // parte na direita.
-                  linha.insert(0, RECUO);
-                  // parte na esquerda.
-                  linha.push(RECUO);
-               }
-            }
-         },
-         // à esquerda, então o padrão...
-         _ => {},
-      };
-      // retornando a matriz, tendo sido modificada ou não.
-      matriz
-   }
-   // cria texto, primariarimente aninhado à esquerda.
-   pub fn cria(string:&str, posicao:Aninhamento) -> Texto { 
-      let mut texto_inicio = aninha_str_em_texto(string); 
-      // contador de ínicio e upper-bound.
-      let mut p = 1;
-      let k = texto_inicio.len();
-      // alterando o aninhamento de cada linha do texto.
-      while p <= k {
-         /* tira do ínicio, e coloca no 
-          * final pós modificação, pois 
-          * depois de de 'k' voltas, a 
-          * lista fica a mesma coisa. */
-         match texto_inicio.pop_front() {
-            Some(l) => { 
-               let nova_linha = Texto::aninha_linha(l, posicao);
-               texto_inicio.push_back(nova_linha);
-            },
-            None => (),
-         }
-         p += 1;
-      }
-      return Texto {
-         linhas: texto_inicio,
-         posicao,
-      };
-   }
-}
-impl Display for Texto {
-   fn fmt(&self, formatador:&mut Formatter<'_>) -> String_fmt {
-      let mut texto:String = String::new();
-      for linha in self.linhas.iter() {
-         // linha é uma matriz "Vec<Vec<char>>".
-         for array in linha.iter() {
-            // cada local da array da matriz.
-            for ch in array.iter() 
-               { texto.push(*ch); }
-            // colocando quebra de linha na string.
-            texto.push('\n');
-         }
-      }
-      // "formata" string, não faço idéia do que 
-      // isso significa, anyway....
-      write!(formatador, "{}", texto)
-   }
-}
-
 #[cfg(test)]
 mod test {
+   // importando bagulho acima.
+   use super::*;
+
    #[test]
    fn testa_criacao_texto() {
-      let texto = super::aninha_str_em_texto(
+      let texto = aninha_str_em_texto(
          "hoje é domingo
          pé de cachimbo
          o cachimbo é de ouro
@@ -276,7 +166,7 @@ mod test {
          acabou-se o mundo."
       );
       for obj in texto 
-         { super::forma_strings::imprime(&obj); }
+         { construtor::imprime(&obj); }
       assert!(false);
    }
    
@@ -284,34 +174,22 @@ mod test {
    fn testa_nova_funcao_de_desenho() {
       let frase:&str = "isso e um teste simples";
       let frase_desenho:Vec<Vec<char>> = {
-         match super::desenha_frase(frase) {
+         match desenha_frase(frase) {
             Ok(fd) => fd,
-            Err(erro_msg) => 
-               { assert!(false); panic!("{}", erro_msg); }
+            Err(erro_msg) => { 
+               assert!(false); 
+               panic!("{}", erro_msg); 
+            }
          }
       };
       let frase:&str = "você percebeu isto!";
       let frase_desenho_ii:Vec<Vec<char>> = {
-         super::desenha_frase(frase)
+         desenha_frase(frase)
          .expect("erro com a frase dada") 
       };
       // visualizando...
-      super::forma_strings::imprime(&frase_desenho);
-      super::forma_strings::imprime(&frase_desenho_ii);
-      assert!(true);
-   }
-
-   use super::{Texto, Aninhamento};
-   #[test]
-   fn mesmo_texto_alinhamentos_diferentes() {
-      let string = "isso é um teste básico de um texto o suficiente longo!";
-      let a_esquerda = Texto::cria(string, Aninhamento::Esquerda);
-      let a_direita = Texto::cria(string, Aninhamento::Direita);
-      let no_centro = Texto::cria(string, Aninhamento::Centro);
-      println!(
-         "ESQUERDA:\n{}\n\nCENTRO:\n{}\n\nDIREITA:\n{}\n\n",
-         a_esquerda, no_centro, a_direita
-      );
+      construtor::imprime(&frase_desenho);
+      construtor::imprime(&frase_desenho_ii);
       assert!(true);
    }
 }

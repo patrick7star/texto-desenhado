@@ -5,10 +5,12 @@
  * de soupa de caractéres.
  */
 
-// módulo externo.
-mod constroi_simbolos;
-use constroi_simbolos::*;
-pub use constroi_simbolos::imprime;
+// minha própria lib.
+use crate::construtor::{
+   carrega_caracteres_pontuacao,
+   carrega_desenhos_numeros,
+   carrega_desenhos_letras
+};
 
 
 fn forma_palavra(palavra:&str) -> Vec<Vec<char>> {
@@ -333,9 +335,13 @@ pub fn desenha_string(string:&str) -> Vec<Vec<char>>{
 
 #[cfg(test)]
 mod tests {
+   // importando tudo acima...
+   use crate::forma_strings::*;
+   use crate::construtor::imprime;
+
    #[test]
    fn testa_fec() {
-      let vetor = super::fatia_em_classes("numero3casa08quadra46");
+      let vetor = fatia_em_classes("numero3casa08quadra46");
       println!("vetor={:#?}", vetor);
       assert_eq!(vec!["numero","3","casa","08","quadra","46"], vetor);
    }
@@ -345,23 +351,21 @@ mod tests {
       let mut letra_h = super::forma_palavra("H");
       let num8 = super::forma_numero("8");
       let diferenca = (num8.len()-letra_h.len()) as u8;
-      super::preenche_linhas_em_branco(&mut letra_h,
-                                       super::Lado::Inferior,
-                                       diferenca);
+      preenche_linhas_em_branco(
+         &mut letra_h,
+         Lado::Inferior,
+         diferenca
+      );
       assert_eq!(letra_h.len(), num8.len());
    }
 
-   use crate::forma_strings::constroi_simbolos::imprime;
-
    #[test]
    fn diferencas_preenchimento() {
-      let mut letra_r = super::forma_palavra("R");
-      let mut letra_h = super::forma_palavra("h");
+      let mut letra_r = forma_palavra("R");
+      let mut letra_h = forma_palavra("h");
 
-      super::preenche_linhas_em_branco(&mut letra_r,
-                                super::Lado::Superior,6);
-      super::preenche_linhas_em_branco(&mut letra_h,
-                                super::Lado::Inferior, 6);
+      preenche_linhas_em_branco(&mut letra_r, Lado::Superior,6);
+      preenche_linhas_em_branco(&mut letra_h, Lado::Inferior, 6);
       println!("mostrando resultados:");
       imprime(&letra_r);
       println!("\n\n");
@@ -370,41 +374,40 @@ mod tests {
 
    #[test]
    fn diferenca_pos_aninhamento() {
-      let mut letra_h = super::forma_palavra("A");
-      let mut num8 = super::forma_numero("8");
+      let mut letra_h = forma_palavra("A");
+      let mut num8 = forma_numero("8");
 
-      super::aninha_matrizes(&mut letra_h, &mut num8);
+      aninha_matrizes(&mut letra_h, &mut num8);
 
       println!("como ficou:");
-      super::imprime(&letra_h.clone());
-      super::imprime(&num8.clone());
+      imprime(&letra_h.clone());
+      imprime(&num8.clone());
 
       assert_eq!(0, letra_h.len()-num8.len());
    }
 
    #[test]
    fn concatenacao_aninhamento_resultado() {
-      let mut palavra = super::forma_palavra("resultado");
-      let mut num = super::forma_numero("42");
+      let mut palavra = forma_palavra("resultado");
+      let mut num = forma_numero("42");
 
-      super::aninha_matrizes(&mut palavra, &mut num);
+      aninha_matrizes(&mut palavra, &mut num);
 
-      super::concatena_matriz(&mut palavra, num.clone());
-      super::imprime(&palavra);
+      concatena_matriz(&mut palavra, num.clone());
+      imprime(&palavra);
       assert!(true);
    }
 
-
    #[test]
    fn testa_ds() {
-      let string = super::desenha_string("jabuti1234");
-      super::imprime(&string);
+      let string = desenha_string("jabuti1234");
+      imprime(&string);
       assert!(true);
    }
 
    #[test]
    fn fatias_agora_com_pontuacao() {
-      let string = super::fatia_em_classes("[algo, ok!]");
+      let string = fatia_em_classes("[algo, ok!]");
       println!("vetor com fatias: {:?}", string);
       assert_eq!(string, vec!["[","algo",",",
                               "ok","!","]"]);
@@ -412,17 +415,17 @@ mod tests {
 
    #[test]
    fn string_formador_incrementado() {
-      println!("fatiamento: {:?}",super::fatia_em_classes("(entao, entre"));
-      let s = super::desenha_string("(entao, entre");
-      super::imprime(&s);
+      println!("fatiamento: {:?}",fatia_em_classes("(entao, entre"));
+      let s = desenha_string("(entao, entre");
+      imprime(&s);
 
-      println!("fatiamento: {:?}",super::fatia_em_classes("voce!]"));
-      let r = super::desenha_string("voce!]");
-      super::imprime(&r);
+      println!("fatiamento: {:?}",fatia_em_classes("voce!]"));
+      let r = desenha_string("voce!]");
+      imprime(&r);
 
-      println!("fatiamento: {:?}",super::fatia_em_classes("10% de viva?"));
-      let v = super::desenha_string("10% de viva?");
-      super::imprime(&v);
+      println!("fatiamento: {:?}",fatia_em_classes("10% de viva?"));
+      let v = desenha_string("10% de viva?");
+      imprime(&v);
    }
 }
 
