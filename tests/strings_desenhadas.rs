@@ -7,7 +7,8 @@
 
 // biblioteca a testar:
 extern crate texto_desenho;
-use texto_desenho::forma_strings::{imprime, desenha_string};
+use texto_desenho::forma_strings::desenha_string;
+use texto_desenho::construtor::imprime;
 
 #[test]
 fn arte_de_palavras_basicas() {
