@@ -4,10 +4,9 @@ use std::collections::LinkedList;
 use std::fmt::{Formatter, Display, Result as String_fmt};
 
 // própria biblioteca do caixote.
-use crate::{
-   Width, Height, terminal_size,
-   aninha_str_em_texto
-};
+use crate::{Matriz, aninha_str_em_texto};
+extern crate utilitarios;
+use utilitarios::terminal_dimensao::{Altura, Largura, dimensao};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Aninhamento {
@@ -29,10 +28,10 @@ pub struct Texto {
 impl Texto {
    /* computa o espaço em branco entre o texto 
     * impresso e o limite da tela. */
-   fn calculo_espaco_vago(matriz:&Vec<Vec<char>>) -> u16 {
+   fn calculo_espaco_vago(matriz:&Matriz) -> u16 {
       let lm:u16 = matriz[1].len() as u16;
-      let lt:u16 = match terminal_size() {
-         Some((Width(l),Height(_))) => l as u16,
+      let lt:u16 = match dimensao() {
+         Some((Largura(l), Altura(_))) => l,
          None => lm,
       };
       return lt-lm;
@@ -43,8 +42,7 @@ impl Texto {
     * pedindo o tipo de 'aninhamento'. Não há está
     * opção a esquerda, pois a função que gera o 
     * texto já é, por padrão, aninhado a ela. */
-   fn aninha_linha(mut matriz:Vec<Vec<char>>, 
-   aninhar:Aninhamento) -> Vec<Vec<char>> {
+   fn aninha_linha(mut matriz:Matriz, aninhar:Aninhamento) -> Matriz {
       // espaços em brancos necessários.
       let qe:usize = Texto::calculo_espaco_vago(&matriz) as usize;
       /* tratando todos tipos de aninhamento.
@@ -112,7 +110,7 @@ impl Texto {
     * que se transforme num aninhamento de 
     * Esquerda novamente, então daí é possível ir
     * para qualquer outro. */
-   fn remove_aninhamento(matriz:&mut Vec<Vec<char>>) {
+   fn remove_aninhamento(matriz:&mut Matriz) {
       // localizando "concreto" da letra mais próximo.
       let mut mais_proximo = matriz[0].len();
       for linha in matriz.iter() {

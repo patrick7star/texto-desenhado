@@ -5,13 +5,23 @@ pub mod forma_strings;
 pub mod construtor;
 mod modelos;
 pub use modelos::{Texto, Aninhamento};
+use forma_strings::{
+   aninha_matrizes, 
+   concatena_matriz, 
+   desenha_string
+};
+use construtor::Matriz;
 
 // biblioteca externa necessária.
-extern crate terminal_size;
-use terminal_size::{Width, Height, terminal_size};
+extern crate utilitarios;
+use utilitarios::terminal_dimensao::*;
 
 // bilioteca padrão do Rust.
 use std::collections::LinkedList;
+
+// apelidos para facilitar codificação.
+type Linhas = LinkedList<Matriz>;
+type ResultadoMatriz = Result<Matriz, &'static str>;
 
 
 /**! Pega uma "string" reparte ela e formata
@@ -31,18 +41,18 @@ pub fn conserta_acentuacao(s:&str) -> String {
    return texto;
 }
 
-pub fn aninha_str_em_texto(string:&str) -> LinkedList<Vec<Vec<char>>> {
+pub fn aninha_str_em_texto(string:&str) -> Linhas {
    let novo_texto = conserta_acentuacao(string);
    // obtendo todas as palavras.
-   let mut palavras = novo_texto.split_ascii_whitespace().peekable();
-   // largura da tela.
-   let lt = match terminal_size() {
-      Some((Width(l), Height(_))) => l,
-      None => 0,
+   let mut palavras = {
+      novo_texto
+      .split_ascii_whitespace()
+      .peekable()
    };
-   //println!("width_terminal={}", lt);
-   let mut linhas:Vec<String> = Vec::new();
-   let mut texto:LinkedList<Vec<Vec<char>>> = LinkedList::new();
+   // largura da tela.
+   let lt = terminal_largura().unwrap().0;
+   let mut linhas: Vec<String> = Vec::new();
+   let mut texto: Linhas = LinkedList::new();
    let mut lg:u16 = 0;
    let mut atual_linha:String = String::new();
    // até se esgotar.
@@ -58,8 +68,6 @@ pub fn aninha_str_em_texto(string:&str) -> LinkedList<Vec<Vec<char>>> {
          // zerando coisas...
          atual_linha.clear();
          lg = 0;
-         // uma simples quebra-de-linha.
-         //println!(" ");
       }
       else {
          // não consumir, apenas "dá uma olhada", e 
@@ -76,7 +84,6 @@ pub fn aninha_str_em_texto(string:&str) -> LinkedList<Vec<Vec<char>>> {
             ).unwrap(); 
             (aux[1].len() as u16) + 3
          };
-         //println!("draw-width={}", lg);
          if lg > lt-4
             { continue; }
          else { 
@@ -84,35 +91,31 @@ pub fn aninha_str_em_texto(string:&str) -> LinkedList<Vec<Vec<char>>> {
             let proxima = palavras.next();
             atual_linha += proxima.unwrap_or(""); 
             atual_linha += " ";
-            //println!("{}", atual_linha);
          }
       }
    }
    // adicionando todos na lista ligada.
    for l in linhas {
-      texto.push_back(
-          desenha_frase(l.as_str())
-          .unwrap()
-      );
+      let frase = desenha_frase(l.as_str());
+      texto.push_back(frase.unwrap());
    }
    /* consertando... coloca última palavra, que
     * o algoritmo não consegue capturar. */
    texto.push_back(
       match desenha_frase(atual_linha.as_str()) {
          Ok(desenho) => desenho,
-         Err(err_msg) => { panic!("{}",err_msg); }
+         Err(err_msg) => 
+            { panic!("{}",err_msg); }
       }
    );
    // retornando texto completo.
    return texto;
 }
 
-pub fn desenha_frase(string:&str) -> 
-Result<Vec<Vec<char>>, &'static str> {
+pub fn desenha_frase(string:&str) -> ResultadoMatriz {
    /* divindindo a frase por espaços brancos
     * e quebra-de-linha. */
-   //let nova_string = conserta_acentuacao(string);
-   let mut palavras:Vec<&str> = {
+   let mut palavras: Vec<&str> = {
       string
       .split_ascii_whitespace()
       .collect()
@@ -122,9 +125,9 @@ Result<Vec<Vec<char>>, &'static str> {
    if qtd == 0
       { return Err("string vazias são inválidas."); }
    else if qtd == 1
-      { return Ok(forma_strings::desenha_string(string)); }
+      { return Ok(desenha_string(string)); }
    // matriz representando espaço vázio.
-   let mut espaco:Vec<Vec<char>> = {
+   let mut espaco: Matriz = {
       vec![
          vec![' ',' ',],
          vec![' ',' ',],
@@ -133,15 +136,15 @@ Result<Vec<Vec<char>>, &'static str> {
          vec![' ',' ',],
       ]
    };
-   let mut frase:Vec<Vec<char>> = forma_strings::desenha_string(palavras[0]);
+   let mut frase: Matriz = desenha_string(palavras[0]);
    palavras.remove(0);
    for p in palavras {
-      forma_strings::aninha_matrizes(&mut frase, &mut espaco);
-      forma_strings::concatena_matriz(&mut frase, espaco.clone());
+      aninha_matrizes(&mut frase, &mut espaco);
+      concatena_matriz(&mut frase, espaco.clone());
       // faz o desenho da palavra.
-      let mut palavra = forma_strings::desenha_string(p);
-      forma_strings::aninha_matrizes(&mut frase, &mut palavra);
-      forma_strings::concatena_matriz(&mut frase, palavra);
+      let mut palavra = desenha_string(p);
+      aninha_matrizes(&mut frase, &mut palavra);
+      concatena_matriz(&mut frase, palavra);
    }
    return Ok(frase);
 }
@@ -150,6 +153,7 @@ Result<Vec<Vec<char>>, &'static str> {
 mod test {
    // importando bagulho acima.
    use super::*;
+   use construtor::imprime;
 
    #[test]
    fn testa_criacao_texto() {
@@ -166,14 +170,14 @@ mod test {
          acabou-se o mundo."
       );
       for obj in texto 
-         { construtor::imprime(&obj); }
+         { imprime(&obj); }
       assert!(false);
    }
    
    #[test]
    fn testa_nova_funcao_de_desenho() {
       let frase:&str = "isso e um teste simples";
-      let frase_desenho:Vec<Vec<char>> = {
+      let frase_desenho: Matriz = {
          match desenha_frase(frase) {
             Ok(fd) => fd,
             Err(erro_msg) => { 
@@ -183,13 +187,13 @@ mod test {
          }
       };
       let frase:&str = "você percebeu isto!";
-      let frase_desenho_ii:Vec<Vec<char>> = {
+      let frase_desenho_ii: Matriz = {
          desenha_frase(frase)
          .expect("erro com a frase dada") 
       };
       // visualizando...
-      construtor::imprime(&frase_desenho);
-      construtor::imprime(&frase_desenho_ii);
+      imprime(&frase_desenho);
+      imprime(&frase_desenho_ii);
       assert!(true);
    }
 }

@@ -9,11 +9,12 @@
 use crate::construtor::{
    carrega_caracteres_pontuacao,
    carrega_desenhos_numeros,
-   carrega_desenhos_letras
+   carrega_desenhos_letras,
+   Matriz
 };
 
 
-fn forma_palavra(palavra:&str) -> Vec<Vec<char>> {
+fn forma_palavra(palavra:&str) -> Matriz {
     /* forma uma palavra dada com slice string
      * por parâmetro, é retornado uma multiarray 
      * assim com os textos e números aplicados 
@@ -59,7 +60,7 @@ fn forma_palavra(palavra:&str) -> Vec<Vec<char>> {
     return matriz;
 }
 
-pub fn concatena_matriz(m1:&mut Vec<Vec<char>>, m2:Vec<Vec<char>>) {
+pub fn concatena_matriz(m1:&mut Matriz, m2:Matriz) {
     /* terceira função de concatena duas matrizes, no caso
      * concatena uma segunda(m2) na primeira(m1), esta última
      * sendo uma referência.*/
@@ -74,7 +75,7 @@ pub fn concatena_matriz(m1:&mut Vec<Vec<char>>, m2:Vec<Vec<char>>) {
     }
 }
 
-fn forma_numero(numero:&str) -> Vec<Vec<char>> {
+fn forma_numero(numero:&str) -> Matriz {
    /* dado um número em forma de string, tendo ele
     * um ou mais dígitos, a função retorna uma 
     * matriz representando ele em forma de 
@@ -142,7 +143,7 @@ fn forma_numero(numero:&str) -> Vec<Vec<char>> {
  */
 pub enum Lado { Superior, Inferior }
 
-pub fn preenche_linhas_em_branco(matriz:&mut Vec<Vec<char>>, 
+pub fn preenche_linhas_em_branco(matriz:&mut Matriz, 
 parte:Lado, qtd:u8) {
    // dimensão da matriz.
    let colunas = matriz[0].len();
@@ -212,7 +213,7 @@ fn fatia_em_classes(string:&str) -> Vec<String> {
    return fatias;
 }
 
-pub fn aninha_matrizes(matriz:&mut Vec<Vec<char>>,
+pub fn aninha_matrizes(matriz:&mut Matriz,
                        outra_matriz:&mut Vec<Vec<char>>) {
    // quantia de linhas de cada matriz.
    let qtd_m = matriz.len();
@@ -281,7 +282,7 @@ fn string_tipo(string:&str) -> Option<TipoStr> {
    }
 }
 
-pub fn desenha_string(string:&str) -> Vec<Vec<char>>{
+pub fn desenha_string(string:&str) -> Matriz {
    /* desenha qualquer string com símbolos ascii
     * e retorna a estrutura de dados(multiarray)
     * representando-o. */
@@ -409,8 +410,10 @@ mod tests {
    fn fatias_agora_com_pontuacao() {
       let string = fatia_em_classes("[algo, ok!]");
       println!("vetor com fatias: {:?}", string);
-      assert_eq!(string, vec!["[","algo",",",
-                              "ok","!","]"]);
+      assert_eq!(
+         string, 
+         vec!["[","algo",",","ok","!","]"]
+      );
    }
 
    #[test]

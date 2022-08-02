@@ -9,14 +9,18 @@ use std::fs::{read_dir, File,DirEntry};
 use std::io::Read;
 use std::path::Path;
 
-
 // caminhos comuns:
 const CAMINHO_ALFABETO:&'static str = "simbolos/alfabeto/";
 const CAMINHO_NUMEROS:&'static str = "./simbolos/numeros/";
 const CAMINHO_PONTUACAO:&'static str = "simbolos/pontuacao";
 
+// apelidos para facilitar codificação.
+pub type Matriz = Vec<Vec<char>>;
+type TabelaInt =  HashMap<u8, Matriz>;
+type TabelaChar = HashMap<char, Matriz>; 
 
-fn matriciar_string(string:String) -> Vec<Vec<char>> {
+
+fn matriciar_string(string:String) -> Matriz {
     /* pega uma string que tem quebra de linha 
      * num texto, representado aqui por uma matriz
      * onde cada linha do texto equivale a uma 
@@ -40,7 +44,7 @@ fn matriciar_string(string:String) -> Vec<Vec<char>> {
     return matriz;
 }
 
-fn arquivo_para_matriz(caminho:&str) -> Vec<Vec<char>> {
+fn arquivo_para_matriz(caminho:&str) -> Matriz {
    /* dado o caminho ao arquivo com texto estruturado
     * lê seus dados e, transforma tal string cuspida 
     * deste dados numa matriz, onde as quebras de linhas
@@ -73,11 +77,11 @@ fn extrai_caminho_str(obj:DirEntry) -> String {
 /** retorna uma tabela contendo as matrizes com desenhos
  de texto estruturado... de todos os algarismos 
  numéricos conhecidos. */
-pub fn carrega_desenhos_numeros() -> HashMap<u8, Vec<Vec<char>> > {
+pub fn carrega_desenhos_numeros() -> TabelaInt {
    /* tabela contendo o número inteiro e uma 
    * estrutura de dados para sua representação 
    * gráfica de texto.*/
-   let mut algarismos:HashMap<u8, Vec<Vec<char>> > = HashMap::new();
+   let mut algarismos: TabelaInt = HashMap::new();
    /* adicionando manualmente todos caminhos, com
    * seus respectivos índices: */
    // array agregando chaves e nome de arquivos.
@@ -100,12 +104,12 @@ pub fn carrega_desenhos_numeros() -> HashMap<u8, Vec<Vec<char>> > {
    return algarismos;
 }
 
-pub fn carrega_desenhos_letras() -> HashMap<char, Vec<Vec<char>>> {
+pub fn carrega_desenhos_letras() ->TabelaChar {
     /* carrega todo o alfabeto num dicionário, tal alfabeto
      * é uma matriz contendo o a letra desenhada por caractéres
      * de forma estruturada. */
     // dicionário contendo tais desenhos.
-    let mut alfabeto:HashMap<char, Vec<Vec<char>>>;
+    let mut alfabeto: TabelaChar;
     alfabeto = HashMap::new();
 
     // caminho para as letras do alfabeto:
@@ -144,7 +148,7 @@ pub fn carrega_desenhos_letras() -> HashMap<char, Vec<Vec<char>>> {
     return alfabeto;
 }
 
-fn equaliza_matriz(matriz:&mut Vec<Vec<char>>) {
+fn equaliza_matriz(matriz:&mut Matriz) {
     /* obtem a referência de uma matriz, então preenche
      * com espaços em branco até atinger a linha da matriz
      * com maior números de colunas. */
@@ -169,13 +173,13 @@ fn equaliza_matriz(matriz:&mut Vec<Vec<char>>) {
     }
 }
 
-pub fn carrega_caracteres_pontuacao() -> HashMap<char, Vec<Vec<char>>> {
+pub fn carrega_caracteres_pontuacao() -> TabelaChar {
    /* todos os caractéres não alfabéticos e 
     * numéricos serão carregados aqui e 
     * colocado num dicionário. */
    // dicionário que conterá todos símbolos 
    // carregados na memória.
-   let mut simbolos:HashMap<char, Vec<Vec<char>>> = HashMap::new();
+   let mut simbolos: TabelaChar = HashMap::new();
    // caminho para todos símbolos.
    let caminho = Path::new(CAMINHO_PONTUACAO);
    // tabela de equivalência.
@@ -202,17 +206,18 @@ pub fn carrega_caracteres_pontuacao() -> HashMap<char, Vec<Vec<char>>> {
 
       // se for um arquivo.
       if pth.is_file() {
-         nome_arq = pth.file_name()
-                      .unwrap()
-                      .to_str()
-                      .unwrap();
+         nome_arq = {
+            pth.file_name()
+             .unwrap()
+             .to_str()
+             .unwrap()
+         };
          // achando caractére correspondente...
          let comp_str = nome_arq.split_once(".txt").unwrap().0;
          for t in equivalente {
             if t.0 == comp_str {
                let caracter = t.1;
                // lendo e transformando conteúdo do arquivo.
-               //let conteudo = read_to_string(pth).unwrap();
                let matriz = arquivo_para_matriz(pth.to_str().unwrap());
 
                // registrando no dicionário.
@@ -229,10 +234,8 @@ pub fn carrega_caracteres_pontuacao() -> HashMap<char, Vec<Vec<char>>> {
 
 /* obtem a referência do objeto e, imprime
  * ele via saída padrão. */
-pub fn imprime(matriz:&Vec<Vec<char>>) {
-   // pega a linha da matriz.
+pub fn imprime(matriz:&Matriz) {
    for row in matriz {
-      // coluna na linha.
       for cell in row 
          { print!("{}", cell); }
       print!("\n");
