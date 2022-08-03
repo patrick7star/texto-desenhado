@@ -5,13 +5,13 @@ texto passado, porém na forma gráfica de desenho.
 
 // bibliotecas importantes.
 use std::collections::HashMap;
-use std::fs::{read_dir, File,DirEntry};
+use std::fs::{read_dir, File, DirEntry};
 use std::io::Read;
 use std::path::Path;
 
 // caminhos comuns:
 const CAMINHO_ALFABETO:&'static str = "simbolos/alfabeto/";
-const CAMINHO_NUMEROS:&'static str = "./simbolos/numeros/";
+const CAMINHO_NUMEROS:&'static str = "simbolos/numeros/";
 const CAMINHO_PONTUACAO:&'static str = "simbolos/pontuacao";
 
 // apelidos para facilitar codificação.
@@ -26,7 +26,7 @@ fn matriciar_string(string:String) -> Matriz {
      * onde cada linha do texto equivale a uma 
      * linha da matriz. */
     // cria uma matriz.
-    let mut matriz:Vec<Vec<char>> = Vec::new();
+    let mut matriz: Matriz = Vec::new();
 
     // iterador que dá várias strings, brotadas
     // da quebra-de-linha.
@@ -50,13 +50,17 @@ fn arquivo_para_matriz(caminho:&str) -> Matriz {
     * deste dados numa matriz, onde as quebras de linhas
     * delimitam a linha da matriz gerada. */
    let mensagem_erro = format!("erro ao abrir arquivo \"{}\"",caminho);
-   let mut arq = File::open(caminho).expect(mensagem_erro.as_str());
+   let mut arq = {
+      File::open(caminho)
+      .expect(mensagem_erro.as_str())
+   };
 
    let mut conteudo:String = String::new();
    // lendo conteúdo do arquivo.
    match arq.read_to_string(&mut conteudo) {
-    Ok(string) => string,
-    Err(e) => panic!("não possível ler conteúdo do arquivo::{}",e)
+      Ok(string) => string,
+      Err(e) => 
+         panic!("não possível ler conteúdo do arquivo::{}",e),
    };
 
    return matriciar_string(conteudo);
@@ -105,78 +109,81 @@ pub fn carrega_desenhos_numeros() -> TabelaInt {
 }
 
 pub fn carrega_desenhos_letras() ->TabelaChar {
-    /* carrega todo o alfabeto num dicionário, tal alfabeto
-     * é uma matriz contendo o a letra desenhada por caractéres
-     * de forma estruturada. */
-    // dicionário contendo tais desenhos.
-    let mut alfabeto: TabelaChar;
-    alfabeto = HashMap::new();
+   /* carrega todo o alfabeto num dicionário, tal alfabeto
+   * é uma matriz contendo o a letra desenhada por caractéres
+   * de forma estruturada. */
+   // dicionário contendo tais desenhos.
+   let mut alfabeto: TabelaChar;
+   alfabeto = HashMap::new();
 
-    // caminho para as letras do alfabeto:
-    let arquivos = match std::fs::read_dir(CAMINHO_ALFABETO) {
-        Ok(iterador) => iterador,
-        Err(_) => panic!("não conseguiu ler o interno do diretório"),
-    };
+   // caminho para as letras do alfabeto:
+   let arquivos = match read_dir(CAMINHO_ALFABETO) {
+      Ok(iterador) => iterador,
+      Err(_) => 
+         panic!("não conseguiu ler o interno do diretório"),
+   };
 
-    // pecorrendo cada arquivo.
-    for a in arquivos {
-        // filtrando estrutura DirEntry do Result<_>.
-        let a = match a {
-            Ok(b) => b,
-            Err(_) => panic!("erro ao ler DirEntry!"),
-        };
-
-        // processando o nome da chave.
-        let nome_arq = match a.file_name().into_string() {
-                        Ok(s) => s,
-                        Err(_) => String::from("nadaI"),
-                      };
-
-        // agora processanddo caminho para uma estrutra Path.
-        let caminho_str = extrai_caminho_str(a); 
-        
-        // obtem a primeira letra do arquivo, que será
-        // usada como chave no dicionário.
-        let letra:char = match nome_arq.chars().next() {
-            Some(c) => c,
-            None => panic!(" erro ao pegar letra do nome do arquivo."),
-        };
-        // adicionando na tabela hash.
-        alfabeto.insert(letra, arquivo_para_matriz(caminho_str.as_str()));
-    }
-    // retorno do dicionário.
-    return alfabeto;
+   // pecorrendo cada arquivo.
+   for a in arquivos {
+      // filtrando estrutura DirEntry do Result<_>.
+      let a = match a {
+         Ok(b) => b,
+         Err(_) => panic!("erro ao ler DirEntry!"),
+      };
+      
+      // processando o nome da chave.
+      let nome_arq = match a.file_name().into_string() {
+         Ok(s) => s,
+         Err(_) => String::from("nadaI"),
+      };
+      
+      // agora processanddo caminho para uma estrutra Path.
+      let caminho_str = extrai_caminho_str(a); 
+      
+      // obtem a primeira letra do arquivo, que será
+      // usada como chave no dicionário.
+      let letra:char = match nome_arq.chars().next() {
+         Some(c) => c,
+         None => 
+            panic!(" erro ao pegar letra do nome do arquivo."),
+      };
+      // adicionando na tabela hash.
+      let matriz = arquivo_para_matriz(caminho_str.as_str());
+      alfabeto.insert(letra, matriz);
+   }
+   // retorno do dicionário.
+   return alfabeto;
 }
 
 fn equaliza_matriz(matriz:&mut Matriz) {
-    /* obtem a referência de uma matriz, então preenche
-     * com espaços em branco até atinger a linha da matriz
-     * com maior números de colunas. */
-    let qtd_linhas = (*matriz).len();
-
-    // acha linha com mais colunas e, esta quantia.
-    let mut max_cols = matriz[0].len();
-    for indice in 1..qtd_linhas {
-        // contabiliza a quantia de colunas da linha atual.
-        let qtd_cols = matriz[indice].len();
-        if  max_cols < qtd_cols { max_cols = qtd_cols; }
-    }
-
-    /* equaliza todas as "linhas" da matriz baseado
-     * na maior, ou seja, a com mais colunas. Serão
-     * preenchidas com espaço em branco.
-     */
-    for i in 0..qtd_linhas {
-        while matriz[i].len() < max_cols {
-            matriz[i].push(' ');
-        }
-    }
+   /* obtem a referência de uma matriz, então preenche
+   * com espaços em branco até atinger a linha da matriz
+   * com maior números de colunas. */
+   let qtd_linhas = (*matriz).len();
+      
+   // acha linha com mais colunas e, esta quantia.
+   let mut max_cols = matriz[0].len();
+   for indice in 1..qtd_linhas {
+      // contabiliza a quantia de colunas da linha atual.
+      let qtd_cols = matriz[indice].len();
+      if  max_cols < qtd_cols 
+         { max_cols = qtd_cols; }
+   }
+   
+   /* equaliza todas as "linhas" da matriz baseado
+   * na maior, ou seja, a com mais colunas. Serão
+   * preenchidas com espaço em branco.
+   */
+   for i in 0..qtd_linhas {
+      while matriz[i].len() < max_cols 
+         { matriz[i].push(' '); }
+   }
 }
 
 pub fn carrega_caracteres_pontuacao() -> TabelaChar {
    /* todos os caractéres não alfabéticos e 
-    * numéricos serão carregados aqui e 
-    * colocado num dicionário. */
+   * numéricos serão carregados aqui e 
+   * colocado num dicionário. */
    // dicionário que conterá todos símbolos 
    // carregados na memória.
    let mut simbolos: TabelaChar = HashMap::new();
@@ -193,24 +200,25 @@ pub fn carrega_caracteres_pontuacao() -> TabelaChar {
       ("igual",'='), ("interrogacao",'?'), ("maior_que",'>'), 
       ("mais",'+'), ("menor_que",'<'), ("porcentagem",'%'),
       ("til", '~'), ("traco",'-'), ("velha",'#'), 
-      ("virgula", ','), ("fecha_chaves",'}'), ("ponto_virgula",';'), 
-      ("ponto", '.'),("circunflexo",'^'),
+      ("virgula", ','), ("fecha_chaves",'}'), 
+      ("ponto_virgula",';'), ("ponto", '.'),
+      ("circunflexo",'^'),
    ];
-
+   
    // iterando tudo dentro do diretório...
    for obj in read_dir(caminho).unwrap() {
       // transforma num Path.
       let aux = obj.unwrap().path();
       let pth = aux.as_path();
       let nome_arq:&str;
-
+      
       // se for um arquivo.
       if pth.is_file() {
          nome_arq = {
             pth.file_name()
-             .unwrap()
-             .to_str()
-             .unwrap()
+            .unwrap()
+            .to_str()
+            .unwrap()
          };
          // achando caractére correspondente...
          let comp_str = nome_arq.split_once(".txt").unwrap().0;
@@ -219,7 +227,7 @@ pub fn carrega_caracteres_pontuacao() -> TabelaChar {
                let caracter = t.1;
                // lendo e transformando conteúdo do arquivo.
                let matriz = arquivo_para_matriz(pth.to_str().unwrap());
-
+               
                // registrando no dicionário.
                simbolos.insert(caracter, matriz);
                // achou o símbolo,... sai.
@@ -279,7 +287,6 @@ mod tests {
    }
 
    #[test]
-   #[ignore]
    fn todos_simbolos_carregados() {
       println!("todos símbolos adicionados:");
       let simbolos = carrega_caracteres_pontuacao();

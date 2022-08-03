@@ -1,5 +1,4 @@
 
-
 // re-exportando funções e módulos.
 pub mod forma_strings;
 pub mod construtor;
@@ -20,8 +19,8 @@ use utilitarios::terminal_dimensao::*;
 use std::collections::LinkedList;
 
 // apelidos para facilitar codificação.
-type Linhas = LinkedList<Matriz>;
 type ResultadoMatriz = Result<Matriz, &'static str>;
+type Linhas = LinkedList<Matriz>;
 
 
 /**! Pega uma "string" reparte ela e formata
@@ -151,23 +150,22 @@ pub fn desenha_frase(string:&str) -> ResultadoMatriz {
 
 #[cfg(test)]
 mod test {
-   // importando bagulho acima.
    use super::*;
    use construtor::imprime;
 
    #[test]
    fn testa_criacao_texto() {
       let texto = aninha_str_em_texto(
-         "hoje é domingo
-         pé de cachimbo
-         o cachimbo é de ouro
-         bate no touro
-         o toro e valente
-         bate na gente
-         a gente é fraco
-         cai no buraco
-         o buraco é fundo
-         acabou-se o mundo."
+         "\rhoje é domingo
+         \rpé de cachimbo
+         \ro cachimbo é de ouro
+         \rbate no touro
+         \ro toro e valente
+         \rbate na gente
+         \ra gente é fraco
+         \rcai no buraco
+         \ro buraco é fundo
+         \racabou-se o mundo."
       );
       for obj in texto 
          { imprime(&obj); }

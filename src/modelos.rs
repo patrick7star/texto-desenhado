@@ -1,10 +1,11 @@
 
 // biblioteca padrão do Rust.
-use std::collections::LinkedList;
 use std::fmt::{Formatter, Display, Result as String_fmt};
 
 // própria biblioteca do caixote.
-use crate::{Matriz, aninha_str_em_texto};
+use crate::{Matriz, aninha_str_em_texto, Linhas};
+
+// biblioteca externa:
 extern crate utilitarios;
 use utilitarios::terminal_dimensao::{Altura, Largura, dimensao};
 
@@ -18,9 +19,10 @@ pub enum Aninhamento {
 // recuo padrão para formatar textos.
 const RECUO:char = ' ';
 
+// appelido para melhorar legibilidade.
 pub struct Texto {
    // lista-ligada contendo cada matriz-de-caractéres.
-   linhas: LinkedList<Vec<Vec<char>>>,
+   linhas: Linhas,
    // em que parte da tela o texto "parte".
    posicao: Aninhamento
 }
@@ -220,7 +222,6 @@ impl Display for Texto {
 
 #[cfg(test)]
 mod tests {
-   // importando bagulho acima.
    use super::*;
 
    #[test]

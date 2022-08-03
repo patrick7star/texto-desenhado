@@ -213,27 +213,25 @@ fn fatia_em_classes(string:&str) -> Vec<String> {
    return fatias;
 }
 
-pub fn aninha_matrizes(matriz:&mut Matriz,
-                       outra_matriz:&mut Vec<Vec<char>>) {
+pub fn aninha_matrizes(matriz:&mut Matriz, outra_matriz:&mut Matriz) {
    // quantia de linhas de cada matriz.
    let qtd_m = matriz.len();
    let qtd_om = outra_matriz.len();
    let dif:u8;
 
    // sua diferença, baseada na maior.
-   if qtd_m > qtd_om {
-      dif = (qtd_m - qtd_om) as u8;
-   }
-   else { dif = (qtd_om - qtd_m) as u8; }
+   if qtd_m > qtd_om 
+      { dif = (qtd_m - qtd_om) as u8; }
+   else 
+      { dif = (qtd_om - qtd_m) as u8; }
 
    if dif != 0 {
       // achando o maior e, ajustando ela.
-      if qtd_m > qtd_om {
-         preenche_linhas_em_branco(outra_matriz, Lado::Superior, dif);
-      }
-      else {
-         preenche_linhas_em_branco(matriz, Lado::Superior, dif);
-      }
+      let lado: Lado = Lado::Superior;
+      if qtd_m > qtd_om 
+         { preenche_linhas_em_branco(outra_matriz, lado, dif); }
+      else 
+         { preenche_linhas_em_branco(matriz, lado, dif); }
    }
 }
 
