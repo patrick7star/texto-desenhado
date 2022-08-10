@@ -27,7 +27,7 @@ fn forma_palavra(palavra:&str) -> Matriz {
 
     // todas as letras necessárias.
     let mut alfabeto = carrega_desenhos_letras();
-    let mut matriz:Vec<Vec<char>>;
+    let mut matriz: Matriz;
     matriz = match alfabeto.get_mut(&letra) { 
         Some(obj) => obj.to_vec(), 
         _ => panic!("notok")
@@ -92,7 +92,7 @@ fn forma_numero(numero:&str) -> Matriz {
             Some(ch) => match ch.to_digit(10) {
                 Some(int) => int as u8,
                 None => panic!("erro! -- var:'int'"),
-                },
+            },
             None => panic!("erro! -- var:'chave'"),
         };
         // busca arquivo com símbolo-desenho-texto.
@@ -150,13 +150,15 @@ parte:Lado, qtd:u8) {
    let linha = vec![' '; colunas];
 
    // adiciona a quantia de linhas demandada.
-   for _i in 1..(qtd+1) {
+   for _ in 1..(qtd+1) {
       // adicionando à partir do lado dado...
       match parte {
          // ... de cima.
-         Lado::Superior => {matriz.insert(0, linha.clone())},
+         Lado::Superior => 
+            {matriz.insert(0, linha.clone())},
          // ... de baixo.
-         Lado::Inferior => {matriz.push(linha.clone())},
+         Lado::Inferior => 
+            {matriz.push(linha.clone())},
       };
    }
 }
@@ -286,8 +288,8 @@ pub fn desenha_string(string:&str) -> Matriz {
     * representando-o. */
    // fatia partes inteiramente numéricas e alfabéticas.
    let substrs = fatia_em_classes(string);
-   let mut matriz:Vec<Vec<char>>;
-   let mut outra:Vec<Vec<char>>;
+   let mut matriz: Matriz;
+   let mut outra: Matriz;
    let mut iterador = substrs.into_iter();
    let pontuacao = carrega_caracteres_pontuacao();
    
