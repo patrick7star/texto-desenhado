@@ -120,14 +120,11 @@ impl MatrizTexto {
       // altura de ambos.
       let (h1, _) = mt1.dimensao();
       let (h2, _) = mt2.dimensao();
-
-      if h1 > h2 {
-         let diferenca:u16 = h1 - h2;
-         mt1.aumenta_altura(diferenca);
-      } else if h1 < h2 {
-         let diferenca = h2 - h1;
-         mt2.aumenta_altura(diferenca);
-      } 
+      
+      if h1 < h2
+         { mt1.aumenta_altura(h2-h1); }
+      else if h1 > h2
+         { mt2.aumenta_altura(h1-h2); }
    }
 }
 
@@ -140,12 +137,16 @@ impl MatrizTexto {
     * será "consumida" dentro do método. */
    pub fn concatena(&mut self, mut matriz: MT) {
       let (_, l) = matriz.dimensao();
+      let largura = self.largura;
+      /* coloca algumas das matrizes à nível 
+       * da outra. */
       MT::equaliza_matrizes(self, &mut matriz); 
+      // redimensiona matriz em "mais 'l'".
       self.aumenta_largura(l);
       for y in 0..self.altura {
          for x in 0..l { 
             let value = matriz.get(y, x);
-            self.set(y, x+l, value);
+            self.set(y, largura + x, value);
          }
       }
    }
@@ -167,7 +168,6 @@ impl MatrizTexto {
 impl MatrizTexto {
    /* transforma uma string -- é necesário que
     * ela seja múltilinha -- numa matriz-texto.
-    */
    pub fn to_matriz(string: &str) -> Self {
       let largura: usize = {
          string.lines()
@@ -203,7 +203,30 @@ impl MatrizTexto {
 
       return matriz;
    }
+   */
+   pub fn to_matriz(string: &str) -> Self {
+      let largura: usize = {
+         string.lines()
+         .map(|linha| linha.chars().count())
+         .max().unwrap()
+      };
+      let altura: u16 = string.lines().count() as u16;
+      let mut matriz = MatrizTexto::cria(
+         altura as u16, 
+         largura as u16
+      );
 
+      for (y, linha) in string.lines().enumerate() {
+         let mut x: u16 = 0;
+         for char in linha.chars() {
+            matriz.set(y as u16, x, char);
+            x += 1;
+         }
+      }
+
+      return matriz
+   }
+   
    /* a mesma função que o método acima, porém com
     * resultante da nova matrix-texto formada. É 
     * um método estático. Os argumentos são referências,

@@ -3,6 +3,7 @@
 pub mod forma_strings;
 pub mod construtor;
 mod modelos;
+
 pub use modelos::{Texto, Aninhamento};
 use forma_strings::{
    aninha_matrizes, 
@@ -17,6 +18,10 @@ use utilitarios::terminal_dimensao::*;
 
 // bilioteca padrão do Rust.
 use std::collections::LinkedList;
+
+// substituto dos antigos módulos:
+mod matriz_texto;
+mod formador;
 
 // apelidos para facilitar codificação.
 type ResultadoMatriz = Result<Matriz, &'static str>;
