@@ -151,7 +151,6 @@ impl MatrizTexto {
       }
    }
 
-
    /* obtem a referência do objeto e, imprime
     * ele via saída padrão. */
    pub fn imprime(&self) {
@@ -167,43 +166,7 @@ impl MatrizTexto {
 // apenas métodos estáticos do objeto.
 impl MatrizTexto {
    /* transforma uma string -- é necesário que
-    * ela seja múltilinha -- numa matriz-texto.
-   pub fn to_matriz(string: &str) -> Self {
-      let largura: usize = {
-         string.lines()
-         .map(|linha| linha.len())
-         .max().unwrap()
-      };
-      // mede baseado na quantia de quebra-de-linhas.
-      let altura: u32 = {
-         string.chars()
-         .map(|ch| ((ch == '\n') as u32) * 1)
-         .sum()
-      };
-
-      // só faz em certas condições estabelecidas.
-      if altura == 0 || altura == 1 || largura == 0 
-         { panic!("dimensões inviáveis para tarefa!"); }
-
-      let mut matriz = MatrizTexto::cria(
-         altura as u16, 
-         largura as u16
-      );
-      let mut iterador = string.chars();
-
-      for y in 0..(altura as u16) {
-         for x in 0..(largura as u16) {
-            match iterador.next() {
-               Some(_char) => 
-                  { matriz.set(y, x, _char); }
-               None => ()
-            }
-         }
-      }
-
-      return matriz;
-   }
-   */
+    * ela seja múltilinha -- numa matriz-texto. */
    pub fn to_matriz(string: &str) -> Self {
       let largura: usize = {
          string.lines()
@@ -257,3 +220,87 @@ impl MatrizTexto {
    }
 }
 
+use std::ops::{IndexMut, Index};
+
+impl Index<usize> for MatrizTexto {
+   type Output = [char];
+   
+   fn index(&self, linha: usize) -> &Self::Output 
+      { return &self.matriz[linha]; }
+}
+
+impl IndexMut<usize> for MatrizTexto {
+   fn index_mut(&mut self, coluna: usize) -> &mut Self::Output 
+      { return &mut self.matriz[coluna]; }
+}
+
+#[cfg(test)]
+mod tests {
+   use super::*;
+
+   #[test]
+   fn indexacao_simples() {
+      let mut m = MT::cria(10, 60);      
+      for l in 0..10 {
+         for c in 0..60 
+            { m.set(l, c, '.'); }
+      }
+      m.imprime();
+      for a in 1..=6
+         { m[5][30 + a] = 'K'; }
+      m.imprime();
+   }
+
+   use utilitarios::aleatorio::sortear;
+   #[test]
+   fn indexacoes_iguais() {
+      let mut m = MT::cria(10, 60);      
+      for l in 0..10 {
+         for c in 0..60 { 
+            let char = sortear::u32(65..=127);
+            m.set(l, c, char::from_u32(char).unwrap()); 
+         }
+      }
+      for y in 0..10 {
+         for x in 0..60 
+            { assert_eq!(m[y][x], m.get(y as u16, x as u16)); }
+      }
+      m.imprime();
+   }
+
+   #[test]
+   fn limpa_alteracoes_feitas() {
+      let mut m = MT::cria(10, 60);      
+      for l in 0..10 {
+         for c in 0..60 { 
+            let char = sortear::u32(65..=127);
+            m.set(l, c, char::from_u32(char).unwrap()); 
+         }
+      }
+      m.imprime();
+      for y in 0..10 {
+         for x in 0..60 
+            { m[y][x] = '_'; }
+      }
+      m.imprime();
+   }
+
+   #[test]
+   #[should_panic]
+   fn erro_das_estruturas_internas() {
+      let mut m = MT::cria(10, 5);      
+      // seus cantos.
+      drop(m[9][4]);
+      drop(m[0][0]);
+      drop(m[0][4]);
+      drop(m[9][0]);
+      let fora_dos_cantos = [
+         (10, 4), (9, 5), (10, 5),
+         (0, 5), (15, 15)
+      ];
+      // aqui quebra.
+      let s = sortear::usize(0..=4);
+      let (y, x) = fora_dos_cantos[s];
+      drop(m[y][x]);
+   }
+}
