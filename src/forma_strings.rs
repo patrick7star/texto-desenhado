@@ -84,7 +84,8 @@ fn forma_numero(numero:&str) -> Matriz {
     let mut algarismos = carrega_desenhos_numeros();
 
     //usa-se da recursividade para acionar o 1º 'if'.
-    if numero.len() == 0 { forma_numero("0") }
+    if numero.is_empty() 
+      { forma_numero("0") }
 
     else if numero.len() == 1 { 
         // chave para acessar dicionário.
@@ -174,20 +175,18 @@ fn fatia_em_classes(string:&str) -> Vec<String> {
        * adiciona a variável auxiliar de letras,
        * e limpa-a para uma possível concatenação
        * numérica. */
-      if ch.is_ascii_alphabetic() { aux.push(ch); }
-      else {
-         if !aux.is_empty() {
-            fatias.push(aux.clone());
-            aux.clear();
-         }
+      if ch.is_ascii_alphabetic() 
+         { aux.push(ch); }
+      else if !aux.is_empty() {
+         fatias.push(aux.clone());
+         aux.clear();
       }
       // o mesmo que o acima, porém apenas com dígitos.
-      if ch.is_ascii_digit() { aux_num.push(ch); }
-      else {
-         if !aux_num.is_empty() {
-            fatias.push(aux_num.clone());
-            aux_num.clear();
-         }
+      if ch.is_ascii_digit() 
+         { aux_num.push(ch); }
+      else if !aux_num.is_empty(){
+         fatias.push(aux_num.clone());
+         aux_num.clear();
       }
 
       /* se for uma das pontuações já criadas, então
@@ -196,11 +195,9 @@ fn fatia_em_classes(string:&str) -> Vec<String> {
       if ch.is_ascii_punctuation() && 
          implementada.contains(&ch.to_string()) 
             { aux_num.push(ch); }
-      else {
-         if !aux_num.is_empty() {
-            fatias.push(aux_num.clone());
-            aux_num.clear();
-         }
+      else if !aux_num.is_empty(){
+         fatias.push(aux_num.clone());
+         aux_num.clear();
       }
    } 
 
@@ -212,14 +209,14 @@ fn fatia_em_classes(string:&str) -> Vec<String> {
    /* retorna uma array contendo todas fatias, 
     * sendo elas numéricas, alfabéticas e demais 
     * posteriormente adicionandas ao grupo. */
-   return fatias;
+   fatias
 }
 
 pub fn aninha_matrizes(matriz:&mut Matriz, outra_matriz:&mut Matriz) {
    // quantia de linhas de cada matriz.
    let qtd_m = matriz.len();
    let qtd_om = outra_matriz.len();
-   let dif:u8;
+   let dif: u8;
 
    // sua diferença, baseada na maior.
    if qtd_m > qtd_om 
@@ -282,7 +279,7 @@ fn string_tipo(string:&str) -> Option<TipoStr> {
    }
 }
 
-pub fn desenha_string(string:&str) -> Matriz {
+pub fn desenha_string(string: &str) -> Matriz {
    /* desenha qualquer string com símbolos ascii
     * e retorna a estrutura de dados(multiarray)
     * representando-o. */
@@ -295,11 +292,11 @@ pub fn desenha_string(string:&str) -> Matriz {
    
    // primeira concatenação manualmente...
    let s = iterador.next().expect("268º linha");
-   match string_tipo(s.clone().as_str()) {
+   match string_tipo(s.as_str()) {
       Some(TipoStr::Alfabeto) => 
-         matriz = forma_palavra(s.clone().as_str()),
+         matriz = forma_palavra(s.as_str()),
       Some(TipoStr::Numerico) => 
-         matriz = forma_numero(s.clone().as_str()),
+         matriz = forma_numero(s.as_str()),
       Some(TipoStr::Pontuacao) => {
          let ch = s.chars().next().unwrap();
          matriz = pontuacao.get(&ch).unwrap().to_vec();

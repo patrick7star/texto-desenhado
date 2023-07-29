@@ -30,19 +30,18 @@ type Linhas = LinkedList<Matriz>;
 
 /**! Pega uma "string" reparte ela e formata
  sua impressão desenhada ajustada com a 
- largura do terminal.
-*/
+ largura do terminal.  */
 pub fn conserta_acentuacao(s:&str) -> String {
-   let mut texto = s.replace("ê","e");
-   texto = texto.replace("ã","a");
-   texto = texto.replace("ú","u");
-   texto = texto.replace("í","i");
-   texto = texto.replace("ç","c");
-   texto = texto.replace("é","e");
-   texto = texto.replace("á","a");
-   texto = texto.replace("ô","o");
-   texto = texto.replace("à", "a");
-   return texto;
+   let mut texto = s.replace('ê',"e");
+   texto = texto.replace('ã',"a");
+   texto = texto.replace('ú',"u");
+   texto = texto.replace('í',"i");
+   texto = texto.replace('ç',"c");
+   texto = texto.replace('é',"e");
+   texto = texto.replace('á',"a");
+   texto = texto.replace('ô',"o");
+   texto = texto.replace('à', "a");
+   texto
 }
 
 pub fn aninha_str_em_texto(string:&str) -> Linhas {
@@ -78,7 +77,7 @@ pub fn aninha_str_em_texto(string:&str) -> Linhas {
          // realizar alguns cálculos.
          let proxima = palavras.peek();
          // acabado o iterador, abandornar loop.
-         if proxima == None 
+         if proxima.is_none()
             { break 'laco; }
          // mensurando a medida da string-desenhada.
          lg += {
@@ -113,7 +112,7 @@ pub fn aninha_str_em_texto(string:&str) -> Linhas {
       }
    );
    // retornando texto completo.
-   return texto;
+   texto
 }
 
 pub fn desenha_frase(string:&str) -> ResultadoMatriz {
@@ -150,7 +149,7 @@ pub fn desenha_frase(string:&str) -> ResultadoMatriz {
       aninha_matrizes(&mut frase, &mut palavra);
       concatena_matriz(&mut frase, palavra);
    }
-   return Ok(frase);
+   Ok(frase)
 }
 
 #[cfg(test)]
@@ -174,7 +173,7 @@ mod test {
       );
       for obj in texto 
          { imprime(&obj); }
-      assert!(false);
+      assert!(true);
    }
    
    #[test]

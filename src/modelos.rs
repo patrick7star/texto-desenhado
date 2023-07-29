@@ -36,7 +36,7 @@ impl Texto {
          Some((Largura(l), Altura(_))) => l,
          None => lm,
       };
-      return lt-lm;
+      lt - lm
    }
 
    /* aninha o texto na matriz dada, partindo da 
@@ -95,12 +95,9 @@ impl Texto {
           * final pós modificação, pois 
           * depois de de 'k' voltas, a 
           * lista fica a mesma coisa. */
-         match texto_inicio.pop_front() {
-            Some(l) => { 
-               let nova_linha = Texto::aninha_linha(l, posicao);
-               texto_inicio.push_back(nova_linha);
-            },
-            None => (),
+         if let Some(l) = texto_inicio.pop_front() {
+            let nova_linha = Texto::aninha_linha(l, posicao);
+            texto_inicio.push_back(nova_linha);
          }
          p += 1;
       }
@@ -140,7 +137,7 @@ impl Texto {
        */
       // se tem parâmetros inválidos, acabar aqui. 
       if nova_posicao == self.posicao
-         { return (); }
+         { return; }
 
       match nova_posicao {
          /* neste caso da Esquerda, apenas remover aninhamento

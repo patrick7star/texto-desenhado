@@ -10,9 +10,9 @@ use std::io::Read;
 use std::path::Path;
 
 // caminhos comuns:
-const CAMINHO_ALFABETO:&'static str = "simbolos/alfabeto/";
-const CAMINHO_NUMEROS:&'static str = "simbolos/numeros/";
-const CAMINHO_PONTUACAO:&'static str = "simbolos/pontuacao";
+const CAMINHO_ALFABETO:&str = "simbolos/alfabeto/";
+const CAMINHO_NUMEROS:&str = "simbolos/numeros/";
+const CAMINHO_PONTUACAO:&str = "simbolos/pontuacao";
 
 // apelidos para facilitar codificação.
 pub type Matriz = Vec<Vec<char>>;
@@ -246,6 +246,8 @@ pub fn imprime(matriz:&Matriz) {
    for row in matriz {
       for cell in row 
          { print!("{}", cell); }
+      // ressalta quebra de linha após última coluna.
+      #[allow(clippy::print_with_newline)]
       print!("\n");
    }
 }

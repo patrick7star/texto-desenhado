@@ -17,9 +17,9 @@ use std::str::FromStr;
 // apelidos para facilitar codificação e legibilidade.
 type TabelaASCII = HashMap<String, MT>;
 // caminhos para os arquivos contendo os símbolos desenhados.
-const ALFABETO:&'static str = "simbolos\\alfabeto";
-const ALGARISMOS:&'static str = "simbolos\\numeros";
-const PONTUACAO:&'static str = "simbolos\\pontuacao";
+const ALFABETO:&str = r"simbolos/alfabeto";
+const ALGARISMOS:&str = r"simbolos/numeros";
+const PONTUACAO:&str = r"simbolos/pontuacao";
 // equivalência de um valor ao nome do arquivo.
 const PARES:[(u8, &str); 10] = [
    (1,"um.txt"),   (2,"dois.txt"), 
@@ -89,19 +89,15 @@ fn traduz_chave(string:&str) -> String {
    let ascii_code = caractere as u32;
 
    let e_alfabetico: bool = {
-      ascii_code >= 97 && ascii_code <= 122
-                     ||
-      ascii_code >= 65 && ascii_code <= 90 
+      (97..=122).contains(&ascii_code) ||
+      (65..=90).contains(&ascii_code)
    };
-   let e_numerico: bool = { 
-         ascii_code >= 48 && 
-         ascii_code <= 57 
-   };
+   let e_numerico = (48..=57).contains(&ascii_code);
    let e_pontuacao: bool = {
-      ascii_code >= 33 && ascii_code <= 47 ||
-      ascii_code >= 123 && ascii_code <= 126 ||
-      ascii_code >= 58 && ascii_code <= 64 ||
-      ascii_code >= 91 && ascii_code <= 94
+      (33..=47).contains(&ascii_code) ||
+      (123..=126).contains(&ascii_code) ||
+      (58..=64).contains(&ascii_code) ||
+      (91..=94).contains(&ascii_code)
    };
 
    for (chave, nome_arquivo) in PARES.iter() {
@@ -130,7 +126,6 @@ fn traduz_chave(string:&str) -> String {
  * na tela do terminal, ou não. */
 pub fn desenha_str(string:&str) -> MT {
    let tabela = inicializa();
-   // espaço.
    let espaco = MatrizTexto::cria(7, 1);
 
    // primeiro caractére.
@@ -141,19 +136,14 @@ pub fn desenha_str(string:&str) -> MT {
 
    // pegando um caractére por vez, mas com slice-str.
    let mut i = 1;
-   loop {
-      match string.get(i..i+1) {
-         Some(chave) => {
-            let chave = traduz_chave(chave);
-            let mt = tabela.get(&chave).unwrap().clone();
-            base.concatena(mt);
-            base.concatena(espaco.clone())
-         } None => { break; }
-      }
+   while let Some(chave) = string.get(i..i+1) {
+      let chave = traduz_chave(chave);
+      let mt = tabela.get(&chave).unwrap().clone();
+      base.concatena(mt);
+      base.concatena(espaco.clone());
       i += 1;
    }
-
-   return base;
+   base
 }
 
 #[cfg(test)]
